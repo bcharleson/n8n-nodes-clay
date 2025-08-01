@@ -1,4 +1,7 @@
+const { ClayApi: ClayApiNode } = require('./nodes/ClayApi/ClayApi.node');
+const { ClayApiCredentials } = require('./credentials/ClayApi.credentials');
+
 module.exports = {
-    ...require('./nodes/ClayApi/ClayApi.node'),
-    ...require('./credentials/ClayApi.credentials')
+    ClayApi: ClayApiNode,
+    ClayApiCredentials: ClayApiCredentials
 };
