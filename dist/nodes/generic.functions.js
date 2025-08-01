@@ -1,11 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.clayApiRequest = clayApiRequest;
-exports.clayWebhookRequest = clayWebhookRequest;
-exports.validateWebhookUrl = validateWebhookUrl;
-exports.validateFieldName = validateFieldName;
-exports.sanitizeFieldValue = sanitizeFieldValue;
-exports.validateAndSanitizeRecordData = validateAndSanitizeRecordData;
+// Generic functions for Clay API integration
 
 /**
  * Make an API request to Clay
@@ -194,3 +187,12 @@ function validateAndSanitizeRecordData(recordData) {
     
     return sanitized;
 }
+
+module.exports = {
+    clayApiRequest,
+    clayWebhookRequest,
+    validateWebhookUrl,
+    validateFieldName,
+    sanitizeFieldValue,
+    validateAndSanitizeRecordData
+};

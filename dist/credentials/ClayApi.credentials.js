@@ -1,7 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClayApi = void 0;
-
 class ClayApi {
     constructor() {
         this.name = 'clayApi';
@@ -28,4 +24,5 @@ class ClayApi {
         };
     }
 }
-exports.ClayApi = ClayApi;
+
+module.exports = { ClayApi };

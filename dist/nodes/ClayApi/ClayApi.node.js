@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClayApi = void 0;
-const n8n_workflow_1 = require("n8n-workflow");
-const generic_functions_1 = require("../generic.functions");
+const { NodeConnectionType, NodeOperationError } = require("n8n-workflow");
+const { clayWebhookRequest, validateWebhookUrl, validateAndSanitizeRecordData } = require("../generic.functions");
 
 class ClayApi {
     constructor() {
@@ -17,8 +14,8 @@ class ClayApi {
             defaults: {
                 name: 'Clay',
             },
-            inputs: [n8n_workflow_1.NodeConnectionType.Main],
-            outputs: [n8n_workflow_1.NodeConnectionType.Main],
+            inputs: [NodeConnectionType.Main],
+            outputs: [NodeConnectionType.Main],
             credentials: [
                 {
                     name: 'clayApi',
@@ -361,8 +358,8 @@ class ClayApi {
                         const fieldMappingMode = this.getNodeParameter('fieldMappingMode', i);
 
                         // Validate webhook URL format
-                        if (!(0, generic_functions_1.validateWebhookUrl)(webhookUrl)) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid Clay webhook URL format. Expected format: https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-{UUID}', { itemIndex: i });
+                        if (!validateWebhookUrl(webhookUrl)) {
+                            throw new NodeOperationError(this.getNode(), 'Invalid Clay webhook URL format. Expected format: https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-{UUID}', { itemIndex: i });
                         }
 
                         // Build the record data based on mapping mode
@@ -382,7 +379,7 @@ class ClayApi {
                             try {
                                 recordData = JSON.parse(fieldsJson);
                             } catch (error) {
-                                throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Invalid JSON in Fields (JSON): ${error.message}`, { itemIndex: i });
+                                throw new NodeOperationError(this.getNode(), `Invalid JSON in Fields (JSON): ${error.message}`, { itemIndex: i });
                             }
                         }
 
@@ -390,25 +387,25 @@ class ClayApi {
                         if (operation === 'updateRecord') {
                             const uniqueField = this.getNodeParameter('uniqueField', i);
                             if (!recordData[uniqueField]) {
-                                throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Unique identifier field "${uniqueField}" must be included in the record data for update operations.`, { itemIndex: i });
+                                throw new NodeOperationError(this.getNode(), `Unique identifier field "${uniqueField}" must be included in the record data for update operations.`, { itemIndex: i });
                             }
                         }
 
                         // Validate that we have some data to send
                         if (Object.keys(recordData).length === 0) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `No fields specified for record ${operation === 'updateRecord' ? 'update' : 'creation'}. Please add at least one field.`, { itemIndex: i });
+                            throw new NodeOperationError(this.getNode(), `No fields specified for record ${operation === 'updateRecord' ? 'update' : 'creation'}. Please add at least one field.`, { itemIndex: i });
                         }
 
                         // Validate and sanitize the record data
                         try {
-                            recordData = (0, generic_functions_1.validateAndSanitizeRecordData)(recordData);
+                            recordData = validateAndSanitizeRecordData(recordData);
                         } catch (error) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Invalid record data: ${error.message}`, { itemIndex: i });
+                            throw new NodeOperationError(this.getNode(), `Invalid record data: ${error.message}`, { itemIndex: i });
                         }
 
                         // Send data to Clay webhook
                         try {
-                            responseData = await generic_functions_1.clayWebhookRequest.call(this, webhookUrl, recordData);
+                            responseData = await clayWebhookRequest.call(this, webhookUrl, recordData);
 
                             // If the webhook doesn't return data, create a success response
                             if (!responseData) {
@@ -426,7 +423,7 @@ class ClayApi {
                             }
                         } catch (error) {
                             const operationType = operation === 'updateRecord' ? 'update/create' : 'create';
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Failed to ${operationType} record in Clay table: ${error.message}. Please verify the webhook URL is correct and the table is accessible.`, { itemIndex: i });
+                            throw new NodeOperationError(this.getNode(), `Failed to ${operationType} record in Clay table: ${error.message}. Please verify the webhook URL is correct and the table is accessible.`, { itemIndex: i });
                         }
 
                     } else if (operation === 'findRecord') {
@@ -538,4 +535,5 @@ class ClayApi {
         return [returnData];
     }
 }
-exports.ClayApi = ClayApi;
+
+module.exports = { ClayApi };
