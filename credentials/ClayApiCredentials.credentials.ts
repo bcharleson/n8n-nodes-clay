@@ -4,7 +4,7 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class ClayApi implements ICredentialType {
+export class ClayApiCredentials implements ICredentialType {
 	name = 'clayApi';
 	displayName = 'Clay API';
 	documentationUrl = 'https://www.clay.com/university/guide/guide-find-clay-api-key';

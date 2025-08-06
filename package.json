@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-clay",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "n8n community node for Clay - Data enrichment and automation platform",
   "keywords": [
     "n8n-community-node-package",
@@ -56,7 +56,7 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ClayApi.credentials.js"
+      "dist/credentials/ClayApiCredentials.credentials.js"
     ],
     "nodes": [
       "dist/nodes/ClayApi/ClayApi.node.js"
