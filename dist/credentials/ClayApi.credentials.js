@@ -1,4 +1,4 @@
-class ClayApiCredentials {
+class ClayApi {
     constructor() {
         this.name = 'clayApi';
         this.displayName = 'Clay API';
@@ -25,4 +25,4 @@ class ClayApiCredentials {
     }
 }
 
-module.exports = { ClayApiCredentials };
+module.exports = { ClayApi };
