@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-clay",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "n8n community node for Clay - Data enrichment and automation platform",
   "keywords": [
     "n8n-community-node-package",
@@ -21,6 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/bcharleson/n8n-nodes-clay.git"
   },
+  "main": "index.js",
   "engines": {
     "node": ">=18.10"
   },
@@ -47,11 +48,7 @@
     "publish:stable": "npm version patch && npm publish"
   },
   "files": [
-    "dist",
-    "icons",
-    "examples",
-    "LICENSE",
-    "README.md"
+    "dist"
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
