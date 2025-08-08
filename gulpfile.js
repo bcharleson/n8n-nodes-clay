@@ -15,7 +15,12 @@ function copyIcons() {
 	src(credSource).pipe(dest(credDestination));
 
 	const iconSource = path.resolve('icons', '*.{png,svg}');
-	const iconDestination = path.resolve('dist', 'icons');
+    const iconDestination = path.resolve('dist', 'icons');
 
-	return src(iconSource).pipe(dest(iconDestination));
+    // Copy to a shared icons folder
+    src(iconSource).pipe(dest(iconDestination));
+
+    // Also place the icon next to the node implementation so 'file:clay.png' resolves correctly
+    const nodeIconDestination = path.resolve('dist', 'nodes', 'ClayApi');
+    return src(iconSource).pipe(dest(nodeIconDestination));
 }

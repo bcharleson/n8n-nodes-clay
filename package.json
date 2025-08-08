@@ -42,13 +42,15 @@
     "dev:setup": "chmod +x scripts/dev-setup.sh && ./scripts/dev-setup.sh",
     "dev:start": "cd ~/n8n-dev-environment && ./start-dev.sh",
     "dev:restart": "cd ~/n8n-dev-environment && ./restart-dev.sh",
+    "prepublishOnly": "npm run build",
     "publish:dev": "npm version prerelease --preid=dev --no-git-tag-version && npm publish --tag dev",
     "publish:beta": "npm version prerelease --preid=beta && npm publish --tag beta",
     "publish:rc": "npm version prerelease --preid=rc && npm publish --tag rc",
     "publish:stable": "npm version patch && npm publish"
   },
   "files": [
-    "dist"
+    "dist",
+    "index.js"
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
