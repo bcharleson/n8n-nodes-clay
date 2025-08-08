@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClayApiCredentials = void 0;
-class ClayApiCredentials {
+exports.ClayApi = void 0;
+class ClayApi {
     constructor() {
         this.name = 'clayApi';
         this.displayName = 'Clay API';
@@ -27,5 +27,5 @@ class ClayApiCredentials {
         };
     }
 }
-exports.ClayApiCredentials = ClayApiCredentials;
-//# sourceMappingURL=ClayApiCredentials.credentials.js.map
+exports.ClayApi = ClayApi;
+//# sourceMappingURL=ClayApi.credentials.js.map

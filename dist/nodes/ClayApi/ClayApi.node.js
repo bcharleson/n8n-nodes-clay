@@ -1,6 +1,8 @@
-const { NodeConnectionType, NodeOperationError } = require("n8n-workflow");
-const { clayWebhookRequest, validateWebhookUrl, validateAndSanitizeRecordData } = require("../generic.functions");
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClayApi = void 0;
+const n8n_workflow_1 = require("n8n-workflow");
+const generic_functions_1 = require("../generic.functions");
 class ClayApi {
     constructor() {
         this.description = {
@@ -14,8 +16,8 @@ class ClayApi {
             defaults: {
                 name: 'Clay',
             },
-            inputs: [NodeConnectionType.Main],
-            outputs: [NodeConnectionType.Main],
+            inputs: ["main" /* NodeConnectionType.Main */],
+            outputs: ["main" /* NodeConnectionType.Main */],
             credentials: [
                 {
                     name: 'clayApi',
@@ -340,31 +342,24 @@ class ClayApi {
             ],
         };
     }
-
     async execute() {
         const items = this.getInputData();
         const returnData = [];
-
         for (let i = 0; i < items.length; i++) {
             try {
                 const resource = this.getNodeParameter('resource', i);
                 const operation = this.getNodeParameter('operation', i);
-
                 let responseData;
-
                 if (resource === 'table') {
                     if (operation === 'createRecord' || operation === 'updateRecord') {
                         const webhookUrl = this.getNodeParameter('webhookUrl', i);
                         const fieldMappingMode = this.getNodeParameter('fieldMappingMode', i);
-
                         // Validate webhook URL format
-                        if (!validateWebhookUrl(webhookUrl)) {
-                            throw new NodeOperationError(this.getNode(), 'Invalid Clay webhook URL format. Expected format: https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-{UUID}', { itemIndex: i });
+                        if (!(0, generic_functions_1.validateWebhookUrl)(webhookUrl)) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid Clay webhook URL format. Expected format: https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-{UUID}', { itemIndex: i });
                         }
-
                         // Build the record data based on mapping mode
                         let recordData = {};
-
                         if (fieldMappingMode === 'manual') {
                             const fields = this.getNodeParameter('fields', i);
                             if (fields.field && Array.isArray(fields.field)) {
@@ -374,39 +369,37 @@ class ClayApi {
                                     }
                                 }
                             }
-                        } else if (fieldMappingMode === 'json') {
+                        }
+                        else if (fieldMappingMode === 'json') {
                             const fieldsJson = this.getNodeParameter('fieldsJson', i);
                             try {
                                 recordData = JSON.parse(fieldsJson);
-                            } catch (error) {
-                                throw new NodeOperationError(this.getNode(), `Invalid JSON in Fields (JSON): ${error.message}`, { itemIndex: i });
+                            }
+                            catch (error) {
+                                throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Invalid JSON in Fields (JSON): ${error.message}`, { itemIndex: i });
                             }
                         }
-
                         // For update operations, validate unique identifier is included
                         if (operation === 'updateRecord') {
                             const uniqueField = this.getNodeParameter('uniqueField', i);
                             if (!recordData[uniqueField]) {
-                                throw new NodeOperationError(this.getNode(), `Unique identifier field "${uniqueField}" must be included in the record data for update operations.`, { itemIndex: i });
+                                throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Unique identifier field "${uniqueField}" must be included in the record data for update operations.`, { itemIndex: i });
                             }
                         }
-
                         // Validate that we have some data to send
                         if (Object.keys(recordData).length === 0) {
-                            throw new NodeOperationError(this.getNode(), `No fields specified for record ${operation === 'updateRecord' ? 'update' : 'creation'}. Please add at least one field.`, { itemIndex: i });
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `No fields specified for record ${operation === 'updateRecord' ? 'update' : 'creation'}. Please add at least one field.`, { itemIndex: i });
                         }
-
                         // Validate and sanitize the record data
                         try {
-                            recordData = validateAndSanitizeRecordData(recordData);
-                        } catch (error) {
-                            throw new NodeOperationError(this.getNode(), `Invalid record data: ${error.message}`, { itemIndex: i });
+                            recordData = (0, generic_functions_1.validateAndSanitizeRecordData)(recordData);
                         }
-
+                        catch (error) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Invalid record data: ${error.message}`, { itemIndex: i });
+                        }
                         // Send data to Clay webhook
                         try {
-                            responseData = await clayWebhookRequest.call(this, webhookUrl, recordData);
-
+                            responseData = await generic_functions_1.clayWebhookRequest.call(this, webhookUrl, recordData);
                             // If the webhook doesn't return data, create a success response
                             if (!responseData) {
                                 const operationType = operation === 'updateRecord' ? 'updated/created' : 'created';
@@ -421,18 +414,18 @@ class ClayApi {
                                     }),
                                 };
                             }
-                        } catch (error) {
-                            const operationType = operation === 'updateRecord' ? 'update/create' : 'create';
-                            throw new NodeOperationError(this.getNode(), `Failed to ${operationType} record in Clay table: ${error.message}. Please verify the webhook URL is correct and the table is accessible.`, { itemIndex: i });
                         }
-
-                    } else if (operation === 'findRecord') {
+                        catch (error) {
+                            const operationType = operation === 'updateRecord' ? 'update/create' : 'create';
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Failed to ${operationType} record in Clay table: ${error.message}. Please verify the webhook URL is correct and the table is accessible.`, { itemIndex: i });
+                        }
+                    }
+                    else if (operation === 'findRecord') {
                         // Clay doesn't provide a direct API for finding records
                         // This operation provides guidance on alternatives
                         const searchField = this.getNodeParameter('searchField', i);
                         const searchValue = this.getNodeParameter('searchValue', i);
                         const limit = this.getNodeParameter('limit', i);
-
                         // Return informational response about Clay's limitations
                         responseData = {
                             success: false,
@@ -452,13 +445,12 @@ class ClayApi {
                             documentation: 'https://www.clay.com/university/guide/lookup-data-from-other-tables',
                             timestamp: new Date().toISOString(),
                         };
-
-                    } else if (operation === 'getSchema') {
+                    }
+                    else if (operation === 'getSchema') {
                         // Clay doesn't provide a direct API for getting table schemas
                         // This operation provides guidance on alternatives
                         const workspaceId = this.getNodeParameter('workspaceId', i);
                         const tableId = this.getNodeParameter('tableId', i);
-
                         // Return informational response about Clay's limitations
                         responseData = {
                             success: false,
@@ -483,8 +475,8 @@ class ClayApi {
                             timestamp: new Date().toISOString(),
                         };
                     }
-
-                } else if (resource === 'workspace') {
+                }
+                else if (resource === 'workspace') {
                     if (operation === 'listWorkspaces') {
                         // Clay doesn't provide a direct API for listing workspaces
                         responseData = {
@@ -499,10 +491,9 @@ class ClayApi {
                             documentation: 'https://www.clay.com/university/guide/workspace-management',
                             timestamp: new Date().toISOString(),
                         };
-
-                    } else if (operation === 'listTables') {
+                    }
+                    else if (operation === 'listTables') {
                         const workspaceId = this.getNodeParameter('workspaceId', i);
-
                         // Clay doesn't provide a direct API for listing tables
                         responseData = {
                             success: false,
@@ -519,10 +510,10 @@ class ClayApi {
                         };
                     }
                 }
-
                 const executionData = this.helpers.constructExecutionMetaData(this.helpers.returnJsonArray(responseData), { itemData: { item: i } });
                 returnData.push(...executionData);
-            } catch (error) {
+            }
+            catch (error) {
                 if (this.continueOnFail()) {
                     const executionData = this.helpers.constructExecutionMetaData([{ json: { error: error.message } }], { itemData: { item: i } });
                     returnData.push(...executionData);
@@ -531,9 +522,8 @@ class ClayApi {
                 throw error;
             }
         }
-
         return [returnData];
     }
 }
-
-module.exports = { ClayApi };
+exports.ClayApi = ClayApi;
+//# sourceMappingURL=ClayApi.node.js.map
