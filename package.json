@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-clay",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "n8n community node for Clay - Data enrichment and automation platform",
   "keywords": [
     "n8n-community-node-package",
@@ -25,7 +25,6 @@
   "engines": {
     "node": ">=18.10"
   },
-
   "scripts": {
     "build": "tsc && gulp build:icons",
     "dev": "tsc --watch",
