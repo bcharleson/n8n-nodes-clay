@@ -10,12 +10,6 @@ exports.validateAndSanitizeRecordData = validateAndSanitizeRecordData;
  * Make an API request to Clay
  */
 async function clayApiRequest(method, endpoint, body = {}, qs = {}) {
-    console.log('Clay API Request:', {
-        method,
-        url: `https://api.clay.com/v3${endpoint}`,
-        qs,
-        body,
-    });
     const options = {
         method,
         url: `https://api.clay.com/v3${endpoint}`,
@@ -84,10 +78,6 @@ async function clayApiRequest(method, endpoint, body = {}, qs = {}) {
  * Make a webhook request to Clay table
  */
 async function clayWebhookRequest(webhookUrl, body = {}) {
-    console.log('Clay Webhook Request:', {
-        url: webhookUrl,
-        body,
-    });
     const options = {
         method: 'POST',
         url: webhookUrl,

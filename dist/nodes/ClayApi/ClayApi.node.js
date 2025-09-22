@@ -8,7 +8,7 @@ class ClayApi {
         this.description = {
             displayName: 'Clay',
             name: 'clayApi',
-            icon: 'file:clay.png',
+            icon: 'file:clay.svg',
             group: ['transform'],
             version: 1,
             subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -16,8 +16,8 @@ class ClayApi {
             defaults: {
                 name: 'Clay',
             },
-            inputs: ["main" /* NodeConnectionType.Main */],
-            outputs: ["main" /* NodeConnectionType.Main */],
+            inputs: ['main'],
+            outputs: ['main'],
             credentials: [
                 {
                     name: 'clayApi',

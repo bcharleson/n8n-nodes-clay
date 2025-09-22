@@ -110,3 +110,16 @@ PROJECT_STATUS.md
 # Development configuration files
 .eslintrc.js
 .prettierrc
+tsconfig.json
+gulpfile.js
+
+# Example workflows (development only)
+examples/
+
+# Additional documentation (keep only README.md)
+CONTRIBUTING.md
+DEPLOYMENT.md
+
+# TypeScript source maps (not needed in production)
+*.js.map
+*.d.ts.map

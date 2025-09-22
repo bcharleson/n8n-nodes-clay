@@ -6,7 +6,6 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
-	NodeConnectionType,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -21,7 +20,7 @@ export class ClayApi implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Clay',
 		name: 'clayApi',
-		icon: 'file:clay.png',
+		icon: 'file:clay.svg',
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -29,8 +28,8 @@ export class ClayApi implements INodeType {
 		defaults: {
 			name: 'Clay',
 		},
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		inputs: ['main'],
+		outputs: ['main'],
 		credentials: [
 			{
 				name: 'clayApi',

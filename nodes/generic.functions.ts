@@ -17,12 +17,7 @@ export async function clayApiRequest(
 	body: IDataObject = {},
 	qs: IDataObject = {},
 ): Promise<any> {
-	console.log('Clay API Request:', {
-		method,
-		url: `https://api.clay.com/v3${endpoint}`,
-		qs,
-		body,
-	});
+
 
 	const options: IHttpRequestOptions = {
 		method,
@@ -94,10 +89,7 @@ export async function clayWebhookRequest(
 	webhookUrl: string,
 	body: IDataObject = {},
 ): Promise<any> {
-	console.log('Clay Webhook Request:', {
-		url: webhookUrl,
-		body,
-	});
+
 
 	const options: IHttpRequestOptions = {
 		method: 'POST',
