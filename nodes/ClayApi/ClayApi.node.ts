@@ -125,9 +125,12 @@ export class ClayApi implements INodeType {
 
 			// WORKSPACE ID FIELD
 			{
-				displayName: 'Workspace ID',
+				displayName: 'Workspace',
 				name: 'workspaceId',
-				type: 'string',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getWorkspaces',
+				},
 				required: true,
 				displayOptions: {
 					show: {
@@ -135,7 +138,24 @@ export class ClayApi implements INodeType {
 					},
 				},
 				default: '',
-				description: 'The ID of the Clay workspace',
+				description: 'Select your Clay workspace or enter workspace ID manually',
+				placeholder: 'Select workspace...',
+			},
+
+			// MANUAL WORKSPACE ID INPUT
+			{
+				displayName: 'Workspace ID',
+				name: 'workspaceIdManual',
+				type: 'string',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['table'],
+						workspaceId: ['manual'],
+					},
+				},
+				default: '',
+				description: 'Enter your Clay workspace ID manually (find it in the URL: app.clay.com/workspaces/YOUR_ID)',
 				placeholder: 'e.g. 12345',
 			},
 
@@ -157,19 +177,62 @@ export class ClayApi implements INodeType {
 
 			// TABLE ID FIELD
 			{
-				displayName: 'Table ID',
+				displayName: 'Table',
 				name: 'tableId',
-				type: 'string',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getTables',
+					loadOptionsDependsOn: ['workspaceId'],
+				},
 				required: true,
 				displayOptions: {
 					show: {
 						resource: ['table'],
 						operation: ['createRecord', 'updateRecord', 'findRecord', 'getSchema'],
 					},
+					hide: {
+						workspaceId: ['manual'],
+					},
 				},
 				default: '',
-				description: 'The ID of the Clay table',
-				placeholder: 'e.g. 67890',
+				description: 'Select your Clay table or enter table ID manually',
+				placeholder: 'Select table...',
+			},
+
+			// MANUAL TABLE ID INPUT
+			{
+				displayName: 'Table ID',
+				name: 'tableIdManual',
+				type: 'string',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['table'],
+						operation: ['createRecord', 'updateRecord', 'findRecord', 'getSchema'],
+						workspaceId: ['manual'],
+					},
+				},
+				default: '',
+				description: 'Enter your Clay table ID manually (find it in the URL: app.clay.com/workspaces/WS_ID/tables/TABLE_ID)',
+				placeholder: 'e.g. t_abc123def456',
+			},
+
+			// MANUAL TABLE ID INPUT (when tableId is manual)
+			{
+				displayName: 'Table ID',
+				name: 'tableIdManual2',
+				type: 'string',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['table'],
+						operation: ['createRecord', 'updateRecord', 'findRecord', 'getSchema'],
+						tableId: ['manual'],
+					},
+				},
+				default: '',
+				description: 'Enter your Clay table ID manually (find it in the URL: app.clay.com/workspaces/WS_ID/tables/TABLE_ID)',
+				placeholder: 'e.g. t_abc123def456',
 			},
 
 			// WEBHOOK URL FIELD (for create and update record)
@@ -368,6 +431,96 @@ export class ClayApi implements INodeType {
 		],
 	};
 
+	async loadOptions(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+		const loadOptionsMethod = this.getCurrentNodeParameter('loadOptionsMethod') as string;
+
+		if (loadOptionsMethod === 'getWorkspaces') {
+			try {
+				// Use the discovered Clay API endpoint for workspaces
+				const workspaces = await clayApiRequest.call(this, 'GET', '/my-workspaces');
+
+				if (workspaces && Array.isArray(workspaces)) {
+					const options = workspaces.map((workspace: any) => ({
+						name: workspace.name || `Workspace ${workspace.id}`,
+						value: workspace.id.toString(),
+						description: workspace.description || `Workspace ID: ${workspace.id}`,
+					}));
+
+					// Add manual entry option at the end
+					options.push({
+						name: '📝 Enter Workspace ID Manually',
+						value: 'manual',
+						description: 'Enter workspace ID manually (find it in Clay URL: app.clay.com/workspaces/YOUR_ID)',
+					});
+
+					return options;
+				}
+			} catch (error) {
+				console.warn('Could not fetch workspaces from Clay API:', error);
+			}
+
+			// Fallback: Provide manual entry instructions
+			return [
+				{
+					name: '📝 Enter Workspace ID Manually',
+					value: 'manual',
+					description: 'API unavailable - enter workspace ID manually (find it in Clay URL)',
+				},
+			];
+		}
+
+		if (loadOptionsMethod === 'getTables') {
+			const workspaceId = this.getCurrentNodeParameter('workspaceId') as string;
+
+			if (!workspaceId || workspaceId === '' || workspaceId === 'manual') {
+				return [
+					{
+						name: '📝 Enter Table ID Manually',
+						value: 'manual',
+						description: 'Select a workspace first, or enter table ID manually',
+					},
+				];
+			}
+
+			try {
+				// Use the discovered Clay API endpoint for workspace details (which includes tables)
+				const workspaceData = await clayApiRequest.call(this, 'GET', `/workspaces/${workspaceId}`);
+
+				if (workspaceData && workspaceData.tables && Array.isArray(workspaceData.tables)) {
+					const options = workspaceData.tables.map((table: any) => ({
+						name: table.name || `Table ${table.id}`,
+						value: table.id.toString(),
+						description: table.description || `Table ID: ${table.id}`,
+					}));
+
+					// Add manual entry option at the end
+					options.push({
+						name: '📝 Enter Table ID Manually',
+						value: 'manual',
+						description: 'Enter table ID manually (find it in Clay URL: app.clay.com/workspaces/WS_ID/tables/TABLE_ID)',
+					});
+
+					return options;
+				}
+			} catch (error) {
+				console.warn('Could not fetch tables from Clay API:', error);
+			}
+
+			// Fallback: Provide manual entry instructions
+			return [
+				{
+					name: '📝 Enter Table ID Manually',
+					value: 'manual',
+					description: 'API unavailable - enter table ID manually (find it in Clay URL)',
+				},
+			];
+		}
+
+		return [];
+	}
+
+
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -507,8 +660,27 @@ export class ClayApi implements INodeType {
 					} else if (operation === 'getSchema') {
 						// Clay doesn't provide a direct API for getting table schemas
 						// This operation provides guidance on alternatives
-						const workspaceId = this.getNodeParameter('workspaceId', i) as string;
-						const tableId = this.getNodeParameter('tableId', i) as string;
+
+						// Get workspace ID (from dropdown or manual input)
+						let workspaceId = this.getNodeParameter('workspaceId', i) as string;
+						if (workspaceId === 'manual') {
+							workspaceId = this.getNodeParameter('workspaceIdManual', i) as string;
+						}
+
+						// Get table ID (from dropdown or manual input)
+						let tableId: string;
+						if (workspaceId === this.getNodeParameter('workspaceIdManual', i)) {
+							// Using manual workspace, get manual table ID
+							tableId = this.getNodeParameter('tableIdManual', i) as string;
+						} else {
+							// Using dropdown workspace, check if table is manual
+							const tableIdParam = this.getNodeParameter('tableId', i) as string;
+							if (tableIdParam === 'manual') {
+								tableId = this.getNodeParameter('tableIdManual2', i) as string;
+							} else {
+								tableId = tableIdParam;
+							}
+						}
 
 						// Return informational response about Clay's limitations
 						responseData = {
@@ -552,7 +724,11 @@ export class ClayApi implements INodeType {
 						};
 
 					} else if (operation === 'listTables') {
-						const workspaceId = this.getNodeParameter('workspaceId', i) as string;
+						// Get workspace ID (from dropdown or manual input)
+						let workspaceId = this.getNodeParameter('workspaceId', i) as string;
+						if (workspaceId === 'manual') {
+							workspaceId = this.getNodeParameter('workspaceIdManual', i) as string;
+						}
 
 						// Clay doesn't provide a direct API for listing tables
 						responseData = {
