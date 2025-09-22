@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-clay",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "n8n community node for Clay - Data enrichment and automation platform",
   "keywords": [
     "n8n-community-node-package",
